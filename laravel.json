@@ -1,0 +1,69 @@
+{
+  "project": {
+    "name": "MyLaravelApp",
+    "language": "PHP",
+    "framework": "Laravel 11",
+    "runtime": "PHP 8.3",
+    "architecture": "layered",
+    "database": "MySQL + Eloquent ORM",
+    "conventions": {
+      "controllers": "PascalCase + Controller suffix in app/Http/Controllers",
+      "models": "PascalCase singular in app/Models",
+      "services": "PascalCase + Service suffix in app/Services",
+      "tests": "PascalCase + Test suffix in tests/Feature or tests/Unit"
+    },
+    "entryPoints": {
+      "web": "routes/web.php",
+      "api": "routes/api.php",
+      "app": "app/Http/Kernel.php"
+    }
+  },
+  "features": {
+    "RegisterUser": {
+      "description": "POST /api/register — creates a new user and sends verification email",
+      "path": "app/Http/Controllers/Auth/RegisterController.php",
+      "status": "stable",
+      "dependencies": ["UserService", "MailService"],
+      "methods": {
+        "register": "Controller method — validates request then calls UserService",
+        "createUser": "Hashes password and persists user via Eloquent",
+        "sendVerificationEmail": "Dispatches SendEmailVerification job to queue"
+      }
+    },
+    "AuthenticateUser": {
+      "description": "POST /api/login — validates credentials and returns Sanctum token",
+      "path": "app/Http/Controllers/Auth/LoginController.php",
+      "status": "stable",
+      "dependencies": ["AuthService"],
+      "methods": {
+        "login": "Controller method — calls Auth::attempt then issues token",
+        "attempt": "Laravel Auth facade checks email+password against users table",
+        "issueToken": "Creates Sanctum personal access token for the authenticated user"
+      }
+    },
+    "ManageProducts": {
+      "description": "CRUD endpoints for product catalogue management",
+      "path": "app/Http/Controllers/ProductController.php",
+      "status": "stable",
+      "dependencies": ["ProductService", "ImageService"],
+      "methods": {
+        "index": "Returns paginated product list with optional category filter",
+        "store": "Validates and creates new product, uploads image via ImageService",
+        "update": "Patches product fields, re-uploads image if new file provided",
+        "destroy": "Soft-deletes product record (keeps for order history integrity)"
+      }
+    },
+    "PlaceOrder": {
+      "description": "POST /api/orders — creates an order and initiates payment",
+      "path": "app/Http/Controllers/OrderController.php",
+      "status": "wip",
+      "dependencies": ["OrderService", "CartService", "PaymentService"],
+      "methods": {
+        "store": "Controller method — wraps entire flow in DB::transaction",
+        "buildFromCart": "CartService converts session cart items into OrderLine records",
+        "chargeCustomer": "PaymentService calls Stripe and returns charge ID",
+        "confirmOrder": "Sets order status to confirmed and clears the cart"
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "project": {
+    "name": "MySpringApp",
+    "language": "Java",
+    "framework": "Spring Boot 3.2",
+    "runtime": "Java 21",
+    "architecture": "layered",
+    "database": "PostgreSQL + Spring Data JPA",
+    "conventions": {
+      "controllers": "PascalCase + Controller suffix",
+      "services": "PascalCase + Service suffix",
+      "repositories": "PascalCase + Repository suffix",
+      "tests": "*Test.java in src/test/"
+    },
+    "entryPoints": {
+      "app": "src/main/java/com/myapp/Application.java",
+      "api": "src/main/java/com/myapp/controller"
+    }
+  },
+  "features": {
+    "RegisterUser": {
+      "description": "POST /api/users — creates a new user account",
+      "path": "src/main/java/com/myapp/controller/UserController.java",
+      "status": "stable",
+      "dependencies": ["UserService", "EmailService"],
+      "methods": {
+        "register": "Controller method — validates @RequestBody and calls UserService",
+        "checkEmailUniqueness": "Queries UserRepository to reject duplicate emails",
+        "encodePassword": "Delegates to BCryptPasswordEncoder before save",
+        "dispatchWelcomeEmail": "Publishes ApplicationEvent picked up by EmailService"
+      }
+    },
+    "AuthenticateUser": {
+      "description": "POST /api/auth/login — validates credentials and returns JWT",
+      "path": "src/main/java/com/myapp/controller/AuthController.java",
+      "status": "stable",
+      "dependencies": ["AuthService", "JwtTokenProvider"],
+      "methods": {
+        "login": "Controller method — calls AuthService.authenticate",
+        "authenticate": "Runs Spring Security AuthenticationManager with credentials",
+        "generateToken": "JwtTokenProvider signs claims with secret and expiry"
+      }
+    },
+    "GetOrderHistory": {
+      "description": "GET /api/orders — returns paginated order list for current user",
+      "path": "src/main/java/com/myapp/controller/OrderController.java",
+      "status": "stable",
+      "dependencies": ["OrderService", "UserService"],
+      "methods": {
+        "getOrders": "Controller method — extracts userId from JWT then paginates",
+        "fetchByUser": "OrderRepository query filtered by userId with Pageable",
+        "mapToDto": "Converts Order entity to OrderResponseDto (hides internals)"
+      }
+    },
+    "ProcessPayment": {
+      "description": "POST /api/payments — charges customer and records transaction",
+      "path": "src/main/java/com/myapp/controller/PaymentController.java",
+      "status": "wip",
+      "dependencies": ["PaymentService", "OrderService", "StripeClient"],
+      "methods": {
+        "charge": "Controller method — delegates to PaymentService inside @Transactional",
+        "callStripe": "StripeClient wraps Stripe SDK charge call with error mapping",
+        "recordTransaction": "Persists PaymentTransaction entity on successful charge",
+        "rollbackOrder": "Sets order status to PAYMENT_FAILED if charge throws"
+      }
+    }
+  }
+}

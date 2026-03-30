@@ -1,0 +1,67 @@
+{
+  "project": {
+    "name": "MyNextApp",
+    "language": "TypeScript",
+    "framework": "Next.js 14",
+    "runtime": "Node 20",
+    "architecture": "feature-based",
+    "database": "PostgreSQL + Prisma",
+    "conventions": {
+      "components": "PascalCase",
+      "files": "kebab-case",
+      "tests": "*.spec.ts adjacent to source"
+    },
+    "entryPoints": {
+      "frontend": "src/app/page.tsx",
+      "api": "src/app/api"
+    }
+  },
+  "features": {
+    "CreateNewUser": {
+      "description": "Handles full user registration flow from input to database",
+      "path": "src/features/user/create-user.ts",
+      "status": "stable",
+      "dependencies": ["EmailService", "UserRepository", "AuthService"],
+      "methods": {
+        "validateInput": "Checks required fields and format (email, password length)",
+        "verifyEmail": "Sends confirmation link and waits for token match",
+        "hashPassword": "Bcrypt hashes the password before any persistence",
+        "saveToDb": "Writes the new user record via UserRepository"
+      }
+    },
+    "AuthenticateUser": {
+      "description": "Login flow: validates credentials and issues JWT",
+      "path": "src/features/auth/authenticate.ts",
+      "status": "stable",
+      "dependencies": ["UserRepository", "TokenService"],
+      "methods": {
+        "findUser": "Looks up account by email in the database",
+        "compareHash": "Runs bcrypt compare against stored password hash",
+        "issueToken": "Signs and returns a JWT with user role and expiry"
+      }
+    },
+    "UploadAvatar": {
+      "description": "Handles user profile image upload and resizing",
+      "path": "src/features/user/upload-avatar.ts",
+      "status": "stable",
+      "dependencies": ["StorageService"],
+      "methods": {
+        "validateFile": "Checks file type (jpg/png) and max size (5MB)",
+        "resizeImage": "Resizes to 256x256 using sharp before upload",
+        "uploadToS3": "Streams resized buffer to S3 and returns public URL",
+        "updateUserRecord": "Saves the new avatar URL to the user's database row"
+      }
+    },
+    "SendPasswordReset": {
+      "description": "Generates a reset token and emails a password reset link",
+      "path": "src/features/auth/password-reset.ts",
+      "status": "stable",
+      "dependencies": ["UserRepository", "EmailService", "TokenService"],
+      "methods": {
+        "findAccount": "Looks up user by email, returns null if not found",
+        "generateToken": "Creates a signed short-lived reset token (15 min expiry)",
+        "sendEmail": "Dispatches reset email with token embedded in link"
+      }
+    }
+  }
+}

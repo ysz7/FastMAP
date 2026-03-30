@@ -1,0 +1,66 @@
+{
+  "project": {
+    "name": "MyFastAPIApp",
+    "language": "Python",
+    "framework": "FastAPI 0.110",
+    "runtime": "Python 3.12",
+    "architecture": "layered",
+    "database": "PostgreSQL + SQLAlchemy",
+    "conventions": {
+      "routers": "snake_case files in routers/",
+      "services": "snake_case files in services/",
+      "models": "PascalCase classes in models/",
+      "tests": "test_*.py in tests/"
+    },
+    "entryPoints": {
+      "app": "app/main.py",
+      "api": "app/routers"
+    }
+  },
+  "features": {
+    "CreateUser": {
+      "description": "POST endpoint to register a new user account",
+      "path": "app/routers/users.py",
+      "status": "stable",
+      "dependencies": ["UserService", "EmailService"],
+      "methods": {
+        "create_user": "Route handler — validates body and delegates to UserService",
+        "validate_unique_email": "Checks DB for duplicate email before insert",
+        "send_welcome_email": "Fires async task to send onboarding email"
+      }
+    },
+    "AuthenticateUser": {
+      "description": "POST /token endpoint — returns JWT on valid credentials",
+      "path": "app/routers/auth.py",
+      "status": "stable",
+      "dependencies": ["UserService", "TokenService"],
+      "methods": {
+        "login": "Route handler — calls UserService.verify then issues token",
+        "verify_password": "Runs bcrypt verify against stored hash",
+        "create_access_token": "Encodes user ID and role into signed JWT"
+      }
+    },
+    "ListProducts": {
+      "description": "GET endpoint returning paginated product catalogue",
+      "path": "app/routers/products.py",
+      "status": "stable",
+      "dependencies": ["ProductService"],
+      "methods": {
+        "get_products": "Route handler — accepts page/limit query params",
+        "apply_filters": "Chains SQLAlchemy filters for category, price range",
+        "paginate": "Slices query result and returns total count alongside items"
+      }
+    },
+    "CreateOrder": {
+      "description": "POST endpoint to place a new customer order",
+      "path": "app/routers/orders.py",
+      "status": "wip",
+      "dependencies": ["OrderService", "ProductService", "PaymentService"],
+      "methods": {
+        "place_order": "Route handler — validates stock then delegates to OrderService",
+        "reserve_stock": "Decrements product quantity atomically inside a transaction",
+        "charge_customer": "Calls PaymentService.charge and rolls back if it fails"
+      }
+    }
+  }
+}
