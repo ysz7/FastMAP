@@ -1,5 +1,6 @@
 ---
 name: fastmap
+version: 1.0.0
 description: >
   FastMAP maintains a living JSON index (fastmap.json) that maps every feature and its internal
   methods to their file paths, so Claude Code never has to scan the whole project.
