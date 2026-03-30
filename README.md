@@ -4,7 +4,7 @@ Persistent knowledge map for Claude Code. Claude reads `fastmap.json` once per s
 
 ## Installation
 
-**1. Download** `fastmap.skill` from [Releases](https://github.com/ysz7/fastmap/releases/latest)
+**1. Download** [`fastmap.skill`](https://github.com/ysz7/FastMAP/raw/main/fastmap.skill)
 
 **2. Install**
 
